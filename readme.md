@@ -2,7 +2,19 @@
 
 Launcher officiel du serveur **FiveM Space Verse**, sur le thème spatial.
 Application de bureau **Electron** (Windows) avec détection FiveM, statut serveur en
-temps réel, purge de cache, mises à jour automatiques et une interface HUD spatiale animée.
+temps réel, purge de cache, mises à jour automatiques et une interface HUD spatiale animée
+autour d'une **scène 3D temps réel**.
+
+---
+
+## 🖼️ Aperçu
+
+|  |  |
+|:--:|:--:|
+| **Accueil — scène 3D** | **Joueurs connectés (live)** |
+| ![Accueil](docs/screenshots/play.png) | ![Joueurs](docs/screenshots/players.png) |
+| **Cinématique de décollage** | **Réglages** |
+| ![Cinématique](docs/screenshots/cinematic.png) | ![Réglages](docs/screenshots/settings.png) |
 
 ---
 

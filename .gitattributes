@@ -1,0 +1,21 @@
+# Normalise les fins de ligne : LF dans le dépôt, natif au checkout.
+* text=auto eol=lf
+
+# Scripts Windows en CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Fichiers binaires (pas de conversion de fin de ligne)
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.7z binary
+*.woff2 binary
+
+# Three.js embarqué : traité comme du binaire (fichier minifié volumineux),
+# exclu des stats de langage GitHub.
+vendor/three.module.min.js binary linguist-vendored
