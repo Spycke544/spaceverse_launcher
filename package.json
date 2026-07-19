@@ -1,0 +1,89 @@
+{
+  "name": "spaceverse-launcher",
+  "version": "1.0.0",
+  "description": "Launcher officiel de Space Verse — serveur FiveM spatial",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "set NODE_ENV=development && electron .",
+    "fix-wincodesign": "node scripts/prepare-wincodesign.js",
+    "prebuild": "node scripts/prepare-wincodesign.js",
+    "build": "set \"CSC_IDENTITY_AUTO_DISCOVERY=false\" && electron-builder",
+    "prebuild:win": "node scripts/prepare-wincodesign.js",
+    "build:win": "set \"CSC_IDENTITY_AUTO_DISCOVERY=false\" && electron-builder --win",
+    "prerelease": "node scripts/prepare-wincodesign.js",
+    "release": "set \"CSC_IDENTITY_AUTO_DISCOVERY=false\" && electron-builder --win --publish always"
+  },
+  "build": {
+    "appId": "com.spaceverse.launcher",
+    "productName": "Space Verse Launcher",
+    "asar": true,
+    "compression": "maximum",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "!*.rar",
+      "!images/**/*",
+      "!.git/**/*",
+      "!.github/**/*",
+      "!node_modules/.cache/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "uninstallDisplayName": "Space Verse Launcher Uninstaller",
+      "license": "license.md",
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "SpaceVerse-Launcher-Setup-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Spycke544",
+        "repo": "spaceverse_launcher",
+        "releaseType": "release"
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/regedit/vbs",
+        "to": "regedit/vbs",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
+  "author": "Spycke54",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.8.9",
+    "find-process": "^1.4.7",
+    "regedit": "^5.1.3",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1"
+  }
+}

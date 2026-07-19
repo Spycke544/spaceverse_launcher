@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.github.com https://servers-frontend.fivem.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self';">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Chakra+Petch:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/main.css">
+<script type="module" src="space3d.js"></script>
+<script defer src="render.js"></script>
+<script defer src="cursor.js"></script>
+<title>Space Verse · Launcher</title>
+</head>
+<body>
+
+<!-- ===== 3D space scene ===== -->
+<canvas id="space3d"></canvas>
+
+<!-- ===== CSS fallback background (only when no WebGL) ===== -->
+<div class="space-bg">
+    <div class="nebula nebula-a"></div>
+    <div class="nebula nebula-b"></div>
+    <div class="nebula nebula-c"></div>
+</div>
+<canvas id="cursor-particles"></canvas>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<!-- ===== Boot ===== -->
+<div id="boot" class="boot">
+    <div class="boot-core">
+        <img src="img/logo.png" alt="Space Verse" class="boot-logo">
+        <div class="boot-ring"></div>
+        <div class="boot-title">SPACE&nbsp;VERSE</div>
+        <div class="boot-sub">SYSTÈME DE LANCEMENT ORBITAL</div>
+        <div class="boot-log" id="boot-log"></div>
+        <div class="boot-bar"><span id="boot-bar-fill"></span></div>
+    </div>
+</div>
+
+<!-- ===== Title bar ===== -->
+<header class="window-bar">
+    <div class="window-title">
+        <span class="window-dot"></span>
+        SPACE&nbsp;VERSE · LAUNCHER OFFICIEL
+    </div>
+    <div class="window-buttons">
+        <button id="btn-minimize" class="window-btn" type="button" title="Réduire">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
+        </button>
+        <button id="btn-refresh" class="window-btn spin-on-hover" type="button" title="Actualiser">
+            <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 4v5h-5"/></svg>
+        </button>
+        <button id="btn-close" class="window-btn close-btn" type="button" title="Fermer">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+    </div>
+</header>
+
+<!-- ===== App ===== -->
+<div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="side-logo">
+            <img src="img/logo.png" alt="Space Verse">
+        </div>
+        <nav class="side-nav">
+            <button class="nav-item active" data-view="play" type="button">
+                <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09zM12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>
+                <span class="nav-label">Jouer</span>
+            </button>
+            <button class="nav-item" data-view="players" type="button">
+                <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                <span class="nav-label">Joueurs</span>
+                <span class="nav-badge" id="nav-players-count"></span>
+            </button>
+            <button class="nav-item" data-view="news" type="button">
+                <span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9h4M18 14h-8M15 18h-5M10 6h8v4h-8V6z"/></svg></span>
+                <span class="nav-label">Actus</span>
+            </button>
+            <button class="nav-item" data-view="settings" type="button">
+                <span class="nav-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                <span class="nav-label">Réglages</span>
+            </button>
+        </nav>
+        <div class="side-foot">
+            <div class="side-status">
+                <span id="side-stat" class="side-stat pulsing"></span>
+                <span id="side-status-label">Scan</span>
+            </div>
+            <button id="btn-discord" class="side-discord" type="button" title="Discord">
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.32 4.37A19.8 19.8 0 0 0 15.4 3c-.2.35-.44.82-.6 1.2a18.3 18.3 0 0 0-5.6 0C9.05 3.82 8.8 3.35 8.6 3a19.7 19.7 0 0 0-4.93 1.37C.53 9 .05 13.51.29 17.96a19.9 19.9 0 0 0 6.06 3.05c.49-.66.92-1.36 1.29-2.1-.71-.27-1.39-.6-2.03-.99.17-.12.34-.25.5-.38a14.2 14.2 0 0 0 12.18 0c.16.13.33.26.5.38-.64.39-1.32.72-2.03.99.37.74.8 1.44 1.29 2.1a19.85 19.85 0 0 0 6.06-3.05c.29-5.16-.48-9.63-3.79-13.59zM8.02 15.25c-1.18 0-2.15-1.09-2.15-2.42 0-1.34.95-2.43 2.15-2.43s2.17 1.1 2.15 2.43c0 1.33-.95 2.42-2.15 2.42zm7.96 0c-1.18 0-2.15-1.09-2.15-2.42 0-1.34.95-2.43 2.15-2.43s2.17 1.1 2.15 2.43c0 1.33-.94 2.42-2.15 2.42z"/></svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Content -->
+    <main class="content">
+
+        <!-- ===== VIEW: PLAY ===== -->
+        <section class="view active" id="view-play">
+            <div class="play-hero">
+                <span class="eyebrow"><span class="eyebrow-tick"></span>SERVEUR FIVEM · EXPÉRIENCE SPATIALE</span>
+                <h1>Franchissez<br>la <em>frontière</em></h1>
+                <p>Embarquez à bord de Space Verse et explorez un univers roleplay sans limites, entre stations orbitales et cités du futur.</p>
+            </div>
+
+            <div class="console">
+                <span class="corner c-tl"></span><span class="corner c-tr"></span>
+                <span class="corner c-bl"></span><span class="corner c-br"></span>
+
+                <div class="console-heading">
+                    <div class="console-id">
+                        <span class="console-kicker">// CONTRÔLE DE MISSION</span>
+                        <h2 id="sv-name">Connexion...</h2>
+                    </div>
+                    <div class="status-pill">
+                        <span id="sv-stat" class="sv-stat pulsing"></span>
+                        <span id="status-label">Scan</span>
+                    </div>
+                </div>
+
+                <div class="telemetry">
+                    <div class="tele-card">
+                        <span class="tele-label">Réseau</span>
+                        <strong id="server-state">Analyse...</strong>
+                    </div>
+                    <div class="tele-card">
+                        <span class="tele-label">Équipage</span>
+                        <strong id="totalPlayers">—</strong>
+                        <canvas class="spark" id="spark-players" width="120" height="26"></canvas>
+                    </div>
+                    <div class="tele-card">
+                        <span class="tele-label">Latence</span>
+                        <strong id="serverPing">—</strong>
+                        <canvas class="spark" id="spark-ping" width="120" height="26"></canvas>
+                    </div>
+                </div>
+
+                <button id="sv-join" class="launch-button" type="button" disabled>
+                    <span class="launch-glow"></span>
+                    <span class="launch-icon" id="launch-icon">
+                        <svg viewBox="0 0 24 24" class="ico-rocket"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09zM12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+                    </span>
+                    <span class="launch-copy">
+                        <small id="launch-small">Prêt au décollage</small>
+                        <strong id="launch-strong">Rejoindre Space Verse</strong>
+                    </span>
+                    <span class="launch-arrow">
+                        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </span>
+                </button>
+
+                <div class="quick-row">
+                    <button id="clearCacheBtn" class="quick-btn" type="button">
+                        <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                        Purger le cache
+                    </button>
+                    <button id="btn-players-jump" class="quick-btn" type="button" data-view="players">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+                        Voir l'équipage
+                    </button>
+                </div>
+
+                <div class="message-zone">
+                    <p id="cacheMessage" class="cache-message"></p>
+                    <p id="launcherMessage" class="launcher-message"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== VIEW: PLAYERS ===== -->
+        <section class="view" id="view-players">
+            <div class="view-head">
+                <div>
+                    <span class="view-kicker">// ÉQUIPAGE EN ORBITE</span>
+                    <h2 id="players-title">Joueurs connectés</h2>
+                </div>
+                <button class="ghost-btn" id="btn-players-refresh" type="button">
+                    <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 4v5h-5"/></svg>
+                    Actualiser
+                </button>
+            </div>
+            <div class="players-scroll">
+                <div class="players-grid" id="players-grid"></div>
+                <div class="players-empty" id="players-empty">Aucun joueur à afficher.</div>
+            </div>
+        </section>
+
+        <!-- ===== VIEW: NEWS ===== -->
+        <section class="view" id="view-news">
+            <div class="view-head">
+                <div>
+                    <span class="view-kicker">// TRANSMISSIONS</span>
+                    <h2>Actualités</h2>
+                </div>
+            </div>
+            <div class="news-scroll">
+                <div class="news-list" id="news-list"></div>
+            </div>
+        </section>
+
+        <!-- ===== VIEW: SETTINGS ===== -->
+        <section class="view" id="view-settings">
+            <div class="view-head">
+                <div>
+                    <span class="view-kicker">// PANNEAU DE BORD</span>
+                    <h2>Réglages</h2>
+                </div>
+            </div>
+            <div class="settings-scroll">
+                <div class="settings-group">
+                    <h3>Serveur</h3>
+                    <div class="set-row">
+                        <div class="set-info"><strong>Nom</strong><span id="set-svname">Space Verse</span></div>
+                    </div>
+                    <div class="set-row">
+                        <div class="set-info"><strong>Adresse</strong><span id="set-ip">—</span></div>
+                        <button class="mini-btn" id="btn-copy-ip" type="button">Copier</button>
+                    </div>
+                    <div class="set-row">
+                        <div class="set-info"><strong>Chemin FiveM</strong><span id="set-fivem">Détection...</span></div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Affichage &amp; audio</h3>
+                    <label class="set-row toggle-row">
+                        <div class="set-info"><strong>Scène 3D</strong><span>Planète et étoiles en temps réel</span></div>
+                        <span class="switch"><input type="checkbox" id="toggle-3d" checked><span class="track"></span></span>
+                    </label>
+                    <label class="set-row toggle-row">
+                        <div class="set-info"><strong>Effets sonores</strong><span>Sons d'interface et ambiance</span></div>
+                        <span class="switch"><input type="checkbox" id="toggle-sound"><span class="track"></span></span>
+                    </label>
+                    <label class="set-row toggle-row">
+                        <div class="set-info"><strong>Animations réduites</strong><span>Limite les effets de mouvement</span></div>
+                        <span class="switch"><input type="checkbox" id="toggle-reduce"><span class="track"></span></span>
+                    </label>
+                </div>
+
+                <div class="settings-group">
+                    <h3>Maintenance</h3>
+                    <div class="set-row">
+                        <div class="set-info"><strong>Cache FiveM</strong><span>Résout la plupart des problèmes de chargement</span></div>
+                        <button class="mini-btn" id="clearCacheBtn2" type="button">Purger</button>
+                    </div>
+                    <p id="cacheMessage2" class="cache-message"></p>
+                </div>
+
+                <div class="settings-group">
+                    <h3>À propos</h3>
+                    <div class="set-row">
+                        <div class="set-info"><strong>Version du launcher</strong><span id="set-version">v1.0.0</span></div>
+                        <span id="set-update" class="set-update">—</span>
+                    </div>
+                    <div class="about-links">
+                        <button class="mini-btn" id="btn-discord2" type="button">Discord</button>
+                        <button class="mini-btn" id="btn-website" type="button">Site web</button>
+                    </div>
+                    <p class="about-credit">Space Verse Launcher · Ad astra, per aspera ✦</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ===== Bottom bar ===== -->
+<footer class="bottom-bar">
+    <span class="bottom-brand">SPACE&nbsp;VERSE — LAUNCHER OFFICIEL</span>
+    <span id="update-status" class="update-status">Vérification de la version...</span>
+    <span id="app-version" class="version">v1.0.0</span>
+</footer>
+
+<!-- ===== Launch cinematic ===== -->
+<div id="launch-cinematic" class="cinematic hidden">
+    <canvas id="warp-canvas"></canvas>
+    <div class="cine-core">
+        <div class="cine-count" id="cine-count">3</div>
+        <div class="cine-title" id="cine-title">SÉQUENCE DE DÉCOLLAGE</div>
+        <div class="cine-sub" id="cine-sub">Allumage des propulseurs...</div>
+        <div class="cine-bar"><span id="cine-bar-fill"></span></div>
+    </div>
+</div>
+
+<!-- ===== Update progress ===== -->
+<div id="update-progress" class="update-progress hidden">
+    <div class="update-header">
+        <span class="update-icon"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 4v5h-5"/></svg></span>
+        <strong>Mise à jour du launcher</strong>
+    </div>
+    <div id="update-message">Recherche d'une mise à jour...</div>
+    <div class="progress-bar"><div id="update-progress-fill"></div></div>
+    <div id="update-percent">0%</div>
+</div>
+
+<!-- ===== Custom cursor ===== -->
+<div class="reticle" id="reticle">
+    <svg viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="9" class="ret-ring"/>
+        <circle cx="20" cy="20" r="1.6" class="ret-dot"/>
+        <path d="M20 3v6M20 31v6M3 20h6M31 20h6" class="ret-cross"/>
+    </svg>
+</div>
+
+</body>
+</html>

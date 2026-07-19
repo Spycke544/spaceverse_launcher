@@ -1,0 +1,41 @@
+{
+    "autoRefresh": true,
+    "autoRefreshInterval": 30000,
+
+    "discord": "https://discord.gg/M9UPEAxXgq",
+    "website": "",
+
+    "githubOwner": "Spycke544",
+    "githubRepo": "spaceverse_launcher",
+
+    "requireLatestLauncher": false,
+    "updateCheckIntervalMinutes": 10,
+
+    "servers": [
+        {
+            "svname": "Space Verse",
+            "ip": "136.243.177.111:30275"
+        }
+    ],
+
+    "news": [
+        {
+            "date": "2026-07-19",
+            "tag": "LANCEMENT",
+            "title": "Le nouveau launcher est en orbite",
+            "body": "Interface spatiale repensée, scène 3D temps réel, liste des joueurs en direct et cinématique de décollage. Bienvenue à bord."
+        },
+        {
+            "date": "2026-07-12",
+            "tag": "SERVEUR",
+            "title": "Station orbitale — nouveaux secteurs",
+            "body": "De nouvelles zones explorables et des missions inédites viennent d'être déployées sur Space Verse."
+        },
+        {
+            "date": "2026-07-05",
+            "tag": "COMMUNAUTÉ",
+            "title": "Événement : la course des météores",
+            "body": "Rejoignez le Discord pour participer au prochain événement communautaire et remporter des récompenses exclusives."
+        }
+    ]
+}
