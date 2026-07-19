@@ -27,7 +27,8 @@ const settings = {
     show3d: store.get('sv_3d', true),
     sound: store.get('sv_sound', false),
     reduce: store.get('sv_reduce', false),
-    planet: store.get('sv_planet', null)
+    planet: store.get('sv_planet', null),
+    volume: store.get('sv_volume', 0.7)
 };
 
 // Apply saved planet theme as early as possible so the 3D scene inits with it.
@@ -37,11 +38,24 @@ if (settings.planet) window.__spaceTheme = settings.planet;
    SOUND (WebAudio, no assets)
    ============================================================ */
 let audioCtx = null;
+let masterGain = null;
 function ensureAudio() {
     if (!settings.sound) return null;
-    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; } }
+    if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        catch { return null; }
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = settings.volume;
+        masterGain.connect(audioCtx.destination);
+    }
     if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
+}
+function setVolume(v) {
+    settings.volume = Math.max(0, Math.min(1, v));
+    if (masterGain && audioCtx) {
+        masterGain.gain.setTargetAtTime(settings.volume, audioCtx.currentTime, 0.02);
+    }
 }
 function blip(freq = 620, dur = 0.08, type = 'sine', gain = 0.05) {
     const ctx = ensureAudio(); if (!ctx) return;
@@ -49,7 +63,7 @@ function blip(freq = 620, dur = 0.08, type = 'sine', gain = 0.05) {
     o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(gain, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
-    o.connect(g); g.connect(ctx.destination);
+    o.connect(g); g.connect(masterGain);
     o.start(); o.stop(ctx.currentTime + dur);
 }
 function whoosh() {
@@ -60,7 +74,7 @@ function whoosh() {
     g.gain.setValueAtTime(0.0001, ctx.currentTime);
     g.gain.linearRampToValueAtTime(0.09, ctx.currentTime + 0.2);
     g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.6);
-    o.connect(g); g.connect(ctx.destination);
+    o.connect(g); g.connect(masterGain);
     o.start(); o.stop(ctx.currentTime + 1.6);
 }
 
@@ -69,7 +83,7 @@ let ambient = null;
 function startAmbient() {
     const ctx = ensureAudio();
     if (!ctx || ambient) return;
-    const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    const master = ctx.createGain(); master.gain.value = 0; master.connect(masterGain);
     const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 420; filter.Q.value = 5; filter.connect(master);
     const oscs = [];
     [55, 82.41, 110, 164.81].forEach((f, i) => {
@@ -391,6 +405,18 @@ function populateSettings() {
     const t3d = $('toggle-3d'), ts = $('toggle-sound'), tr = $('toggle-reduce');
     if (t3d) { t3d.checked = settings.show3d; t3d.addEventListener('change', () => { settings.show3d = t3d.checked; store.set('sv_3d', t3d.checked); apply3d(); blip(); }); }
     if (ts) { ts.checked = settings.sound; ts.addEventListener('change', () => { settings.sound = ts.checked; store.set('sv_sound', ts.checked); if (ts.checked) { ensureAudio(); blip(720); startAmbient(); } else { stopAmbient(); } }); }
+
+    const vol = $('volume-slider'), volVal = $('volume-val');
+    if (vol) {
+        const paint = (pct) => {
+            vol.style.setProperty('--fill', `${pct}%`);
+            if (volVal) volVal.textContent = `${Math.round(pct)}%`;
+        };
+        vol.value = Math.round(settings.volume * 100);
+        paint(vol.value);
+        vol.addEventListener('input', () => { setVolume(vol.value / 100); paint(vol.value); });
+        vol.addEventListener('change', () => { store.set('sv_volume', settings.volume); if (settings.sound) blip(660, 0.07, 'triangle'); });
+    }
     if (tr) { tr.checked = settings.reduce; tr.addEventListener('change', () => { settings.reduce = tr.checked; store.set('sv_reduce', tr.checked); applyReduce(); blip(); }); }
 
     $('btn-copy-ip')?.addEventListener('click', () => {
