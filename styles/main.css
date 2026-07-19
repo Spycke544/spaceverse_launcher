@@ -261,6 +261,12 @@ body.reduce-anim .nebula { animation:none; }
 .mini-btn { flex-shrink:0; padding:8px 14px; border-radius:9px; border:1px solid var(--edge-soft); color:var(--cyan-2);
     font-family:var(--ui); font-weight:600; font-size:12px; background:rgba(8,12,24,.5); transition:var(--fast); }
 .mini-btn:hover { color:var(--chrome); border-color:var(--edge-cyan); background:rgba(56,182,255,.12); }
+.sv-select { flex-shrink:0; min-width:160px; padding:8px 12px; border-radius:9px; border:1px solid var(--edge-soft);
+    color:var(--chrome); font-family:var(--ui); font-weight:600; font-size:13px; background:rgba(8,12,24,.7);
+    cursor:none !important; transition:var(--fast); }
+.sv-select:hover { border-color:var(--edge-cyan); background:rgba(56,182,255,.1); }
+.sv-select:focus { outline:none; border-color:var(--edge-cyan); }
+.sv-select option { background:#0a1120; color:var(--chrome); }
 .set-update { font-family:var(--mono); font-size:10px; color:var(--steel-dim); }
 .set-update.ok { color:var(--green); } .set-update.warn { color:var(--amber); } .set-update.err { color:var(--red); }
 .about-links { display:flex; gap:9px; margin-top:6px; }

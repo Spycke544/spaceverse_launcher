@@ -26,8 +26,12 @@ const store = {
 const settings = {
     show3d: store.get('sv_3d', true),
     sound: store.get('sv_sound', false),
-    reduce: store.get('sv_reduce', false)
+    reduce: store.get('sv_reduce', false),
+    planet: store.get('sv_planet', null)
 };
+
+// Apply saved planet theme as early as possible so the 3D scene inits with it.
+if (settings.planet) window.__spaceTheme = settings.planet;
 
 /* ============================================================
    SOUND (WebAudio, no assets)
@@ -320,7 +324,36 @@ function populateSettings() {
     $('btn-website')?.addEventListener('click', () => { if (config?.website) window.electronAPI.openExternal(config.website); });
     if (!config?.website && $('btn-website')) $('btn-website').style.display = 'none';
 
+    setupPlanetTheme();
     apply3d(); applyReduce();
+}
+
+function setupPlanetTheme() {
+    const select = $('planet-select');
+    if (!select) return;
+    const desired = settings.planet || config?.planet || 'terra';
+
+    const fill = () => {
+        if (!window.SpaceScene) return false;
+        const themes = window.SpaceScene.themes();
+        select.innerHTML = themes.map((t) => `<option value="${t.key}">${escapeHtml(t.label)}</option>`).join('');
+        select.value = desired;
+        window.SpaceScene.setTheme(desired);
+        return true;
+    };
+
+    if (!fill()) {
+        document.addEventListener('space-scene-ready', fill, { once: true });
+    }
+
+    select.addEventListener('change', () => {
+        const val = select.value;
+        settings.planet = val;
+        store.set('sv_planet', val);
+        window.__spaceTheme = val;
+        window.SpaceScene?.setTheme(val);
+        blip(600, 0.06, 'triangle');
+    });
 }
 function apply3d() {
     document.body.classList.toggle('hide-3d', !settings.show3d);

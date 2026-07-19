@@ -11,10 +11,10 @@ autour d'une **scène 3D temps réel**.
 
 |  |  |
 |:--:|:--:|
-| **Accueil — scène 3D** | **Joueurs connectés (live)** |
-| ![Accueil](docs/screenshots/play.png) | ![Joueurs](docs/screenshots/players.png) |
-| **Cinématique de décollage** | **Réglages** |
-| ![Cinématique](docs/screenshots/cinematic.png) | ![Réglages](docs/screenshots/settings.png) |
+| **Accueil — scène 3D (Terra)** | **Thème géante gazeuse (anneaux)** |
+| ![Accueil](docs/screenshots/play.png) | ![Géante gazeuse](docs/screenshots/planet-gas.png) |
+| **Joueurs connectés (live)** | **Cinématique de décollage** |
+| ![Joueurs](docs/screenshots/players.png) | ![Cinématique](docs/screenshots/cinematic.png) |
 
 ---
 
@@ -22,7 +22,9 @@ autour d'une **scène 3D temps réel**.
 
 - **Scène spatiale 3D temps réel (WebGL / Three.js, hors ligne)** : planète procédurale
   (générée par bruit, sans texture externe) avec atmosphère fresnel, nuages, lune, station
-  en orbite, 6000 étoiles en profondeur et nébuleuses ; caméra réactive à la souris.
+  en orbite, **anneaux planétaires**, **ceinture d'astéroïdes**, 6000 étoiles en profondeur
+  et nébuleuses ; caméra réactive à la souris. **4 thèmes de planète** au choix dans les réglages :
+  *Terra, Mars, Géante gazeuse, Monde glacé* (aussi configurable via `planet` dans `config.json`).
 - **Application multi-sections** avec barre latérale :
   - **Jouer** — logo, contrôle de mission, télémétrie + sparklines, décollage.
   - **Joueurs** — liste **en direct** des connectés (avatar, ID, latence colorée).
