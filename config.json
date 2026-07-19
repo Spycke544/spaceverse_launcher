@@ -20,6 +20,13 @@
         }
     ],
 
+    "event": {
+        "tag": "ÉVÉNEMENT",
+        "title": "La course des météores",
+        "date": "2026-07-26T20:00:00",
+        "link": "https://discord.gg/M9UPEAxXgq"
+    },
+
     "news": [
         {
             "date": "2026-07-19",

@@ -64,6 +64,37 @@ function whoosh() {
     o.start(); o.stop(ctx.currentTime + 1.6);
 }
 
+/* ambient space drone (subtle evolving pad) */
+let ambient = null;
+function startAmbient() {
+    const ctx = ensureAudio();
+    if (!ctx || ambient) return;
+    const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 420; filter.Q.value = 5; filter.connect(master);
+    const oscs = [];
+    [55, 82.41, 110, 164.81].forEach((f, i) => {
+        const o = ctx.createOscillator(); o.type = i < 2 ? 'sawtooth' : 'sine';
+        o.frequency.value = f; o.detune.value = (i - 1.5) * 6;
+        const g = ctx.createGain(); g.gain.value = i === 0 ? 0.5 : 0.2 - i * 0.03;
+        o.connect(g); g.connect(filter); o.start(); oscs.push(o);
+    });
+    const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.05;
+    const lfoGain = ctx.createGain(); lfoGain.gain.value = 200;
+    lfo.connect(lfoGain); lfoGain.connect(filter.frequency); lfo.start();
+    master.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 3);
+    ambient = { master, oscs, lfo };
+}
+function stopAmbient() {
+    if (!ambient || !audioCtx) { ambient = null; return; }
+    const ctx = audioCtx; const a = ambient; ambient = null;
+    try {
+        a.master.gain.cancelScheduledValues(ctx.currentTime);
+        a.master.gain.setValueAtTime(a.master.gain.value, ctx.currentTime);
+        a.master.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.2);
+        setTimeout(() => { try { a.oscs.forEach((o) => o.stop()); a.lfo.stop(); } catch {} }, 1300);
+    } catch {}
+}
+
 /* ============================================================
    VIEW ROUTING
    ============================================================ */
@@ -102,6 +133,7 @@ async function initializeLauncher() {
         fiveMPath = await window.electronAPI.getFiveMPath();
         await displayAppVersion();
         renderNews();
+        renderEvent();
         populateSettings();
         setupCacheButtons();
         await loadServerStatus();
@@ -303,6 +335,51 @@ function formatDate(d) {
 }
 
 /* ============================================================
+   EVENT CARD (live countdown)
+   ============================================================ */
+let eventInterval = null;
+function renderEvent() {
+    const card = $('event-card');
+    if (!card) return;
+    const ev = config?.event;
+    const target = ev?.date ? new Date(ev.date).getTime() : NaN;
+    if (!ev || !ev.title || isNaN(target)) { card.classList.add('hidden'); return; }
+
+    if ($('event-tag')) $('event-tag').textContent = ev.tag || 'ÉVÉNEMENT';
+    if ($('event-title')) $('event-title').textContent = ev.title;
+    card.onclick = () => window.electronAPI.openExternal(ev.link || config.discord || '');
+
+    const countEl = $('event-count');
+    const pad = (n) => String(n).padStart(2, '0');
+    const LIVE_WINDOW = 3 * 3600 * 1000;
+
+    const tick = () => {
+        let diff = target - Date.now();
+        if (diff <= 0 && diff > -LIVE_WINDOW) {
+            countEl.textContent = 'EN DIRECT';
+            countEl.classList.add('live');
+            card.classList.remove('hidden');
+            return;
+        }
+        if (diff <= -LIVE_WINDOW) {
+            card.classList.add('hidden');
+            if (eventInterval) { clearInterval(eventInterval); eventInterval = null; }
+            return;
+        }
+        countEl.classList.remove('live');
+        const d = Math.floor(diff / 86400000); diff -= d * 86400000;
+        const h = Math.floor(diff / 3600000); diff -= h * 3600000;
+        const m = Math.floor(diff / 60000); diff -= m * 60000;
+        const s = Math.floor(diff / 1000);
+        countEl.textContent = d > 0 ? `J-${d} · ${pad(h)}:${pad(m)}` : `${pad(h)}:${pad(m)}:${pad(s)}`;
+        card.classList.remove('hidden');
+    };
+    tick();
+    if (eventInterval) clearInterval(eventInterval);
+    eventInterval = setInterval(tick, 1000);
+}
+
+/* ============================================================
    SETTINGS VIEW
    ============================================================ */
 function populateSettings() {
@@ -313,7 +390,7 @@ function populateSettings() {
 
     const t3d = $('toggle-3d'), ts = $('toggle-sound'), tr = $('toggle-reduce');
     if (t3d) { t3d.checked = settings.show3d; t3d.addEventListener('change', () => { settings.show3d = t3d.checked; store.set('sv_3d', t3d.checked); apply3d(); blip(); }); }
-    if (ts) { ts.checked = settings.sound; ts.addEventListener('change', () => { settings.sound = ts.checked; store.set('sv_sound', ts.checked); if (ts.checked) { ensureAudio(); blip(720); } }); }
+    if (ts) { ts.checked = settings.sound; ts.addEventListener('change', () => { settings.sound = ts.checked; store.set('sv_sound', ts.checked); if (ts.checked) { ensureAudio(); blip(720); startAmbient(); } else { stopAmbient(); } }); }
     if (tr) { tr.checked = settings.reduce; tr.addEventListener('change', () => { settings.reduce = tr.checked; store.set('sv_reduce', tr.checked); applyReduce(); blip(); }); }
 
     $('btn-copy-ip')?.addEventListener('click', () => {
@@ -575,6 +652,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAutomaticUpdates();
     initializeLauncher();
     setupHoverSound();
+
+    // Ambient soundscape needs a user gesture to start; if the user already
+    // enabled sound in a previous session, kick it off on their first click.
+    if (settings.sound) {
+        const kick = () => { ensureAudio(); startAmbient(); document.removeEventListener('pointerdown', kick); };
+        document.addEventListener('pointerdown', kick, { once: true });
+    }
 
     document.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => switchView(b.dataset.view)));
 

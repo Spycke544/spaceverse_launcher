@@ -1,6 +1,6 @@
 {
   "name": "spaceverse-launcher",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Launcher officiel de Space Verse — serveur FiveM spatial",
   "main": "main.js",
   "scripts": {
